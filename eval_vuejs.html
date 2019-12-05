@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div id="app">
+    <h1>{{titre}}</h1>
+    <h3>{{soustitre}}</h3>
+    <table class="table_facture">
+        <tr>
+            <th v-for="(elem,i) in ligne1">{{elem}}</th>
+        </tr>
+        <tr v-for="(elem,i) in tab" :key="elem.id">
+            <td><input readonly v-model=elem.id></td>
+            <td><input  v-model=elem.designation></td>
+            <td><input  v-model=elem.qte></td>
+            <td><input  @focusout="calculpht(i)" v-model=elem.puht></td>
+            <td><input  @focusout="calculpttc(i)"  v-model=elem.tva></td>
+            <td><input v-model=elem.pht readonly></td>
+            <td><input v-model=elem.pttc readonly></td>
+
+            <td><img @click="clickdel(i)" src="trash-alt-solid.svg" height="30px"></td>
+        </tr>
+    </table>
+    <button @click="clickadd">{{text_ajout}}</button>
+    <span>{{resultat1}}{{calcultotalht()}}</span>
+    <span>{{resultat2}}{{calcultotalttc()}}</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script type="text/javascript">
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            titre: "Evaluation Vuejs",
+            soustitre: "Facture du 1 Décembre 2019",
+            ligne1:["Id", "Designation", "Qte", "Pu Ht", "Tva", "P Ht", "P Ttc"],
+            tab:[{id: 1, designation: "", qte: "0", puht: "0", tva: "0", pht: "", pttc: ""},],
+            text_ajout : "+ Ajouter une ligne",
+            total_HT: 0,
+            total_TTC: 0,
+            resultat1: "Total HT : ",
+            resultat2: "Total TTC : "
+        },
+        methods:{
+            calculpht(i){
+                this.tab[i].pht = (this.tab[i].qte * this.tab[i].puht);
+            },
+            calculpttc(i){
+                this.tab[i].pttc = (this.tab[i].pht + (this.tab[i].pht * this.tab[i].tva / 100) );
+            },
+            calcultotalht(){
+                let total = 0;
+                this.tab.forEach(function(el){
+                    total += el.pht;
+                });
+                return total;
+            },
+            calcultotalttc(){
+                let total = 0;
+                this.tab.forEach(function(el){
+                    total += el.pttc;
+                });
+                return total;
+            },
+            clickadd(){
+                if(this.tab.length > 0) {
+                    this.tab.push({id: this.tab[this.tab.length - 1].id + 1, designation: "", qte: "0", puht: "0", tva: "0", pht: "", pttc: ""});
+                }
+                else{
+                    this.tab.push({id: 1, designation: "", qte: "0", puht: "0", tva: "0", pht: "", pttc: ""})
+                }
+                localStorage.setItem('tab', JSON.stringify(this.tab));
+            },
+            clickdel(i){
+                this.tab.splice(i,1);
+                localStorage.setItem('tab', JSON.stringify(this.tab));
+            }
+        },
+        mounted() {
+            let tabrecup = JSON.parse(localStorage.getItem('tab'));
+            if(tabrecup != null){
+                this.tab = tabrecup;
+            }
+        },
+    });
+</script>
+
+</body>
+</html>
